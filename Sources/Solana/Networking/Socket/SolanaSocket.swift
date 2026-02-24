@@ -132,36 +132,26 @@ extension SolanaSocket: WebSocketDelegate {
         case .connected(let headers):
             onConnect?()
             onConnected?(headers)
-            
         case .disconnected(let reason, let code):
             onDisconnect?(reason, code)
-            
         case .text(let string):
             onText?(string)
-            
         case .binary(let data):
             onBinary?(data)
-            
         case .pong(let data):
             onPong?(data)
-            
         case .ping(let data):
             onPing?(data)
-            
         case .error(let error):
             onError?(error)
-            
         case .cancelled:
             onCancel?()
-            
         case .viabilityChanged(let isViable):
             onViabilityChanged?(isViable)
-            
         case .reconnectSuggested(let shouldReconnect):
             onReconnectSuggested?(shouldReconnect)
-            
         @unknown default:
-            break  // Handles any future/unknown events
+            break
         }
     }
     
