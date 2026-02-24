@@ -127,26 +127,44 @@ public class SolanaSocket {
 
 extension SolanaSocket: WebSocketDelegate {
 
-    public func didReceive(event: WebSocketEvent, client: WebSocket) {
-        log(event: event)
+    public func didReceive(event: WebSocketEvent, client: WebSocketClient) {
         switch event {
-        case .connected:
-            delegate?.connected()
+        case .connected(let headers):
+            onConnect?()
+            onConnected?(headers)
+            
         case .disconnected(let reason, let code):
-            delegate?.disconnected(reason: reason, code: code)
+            onDisconnect?(reason, code)
+            
         case .text(let string):
-            onText(string: string)
-        case .binary: break
-        case .ping: break
-        case .pong: break
-        case .viabilityChanged: break
-        case .reconnectSuggested: break
-        case .cancelled: break
-        case .error(let error): break
-            self.delegate?.error(error: error)
+            onText?(string)
+            
+        case .binary(let data):
+            onBinary?(data)
+            
+        case .pong(let data):
+            onPong?(data)
+            
+        case .ping(let data):
+            onPing?(data)
+            
+        case .error(let error):
+            onError?(error)
+            
+        case .cancelled:
+            onCancel?()
+            
+        case .viabilityChanged(let isViable):
+            onViabilityChanged?(isViable)
+            
+        case .reconnectSuggested(let shouldReconnect):
+            onReconnectSuggested?(shouldReconnect)
+            
+        @unknown default:
+            break  // Handles any future/unknown events
         }
     }
-
+    
     private func log(event: WebSocketEvent) {
         switch event {
         case .connected(let headers):
