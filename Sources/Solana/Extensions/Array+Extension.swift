@@ -1,27 +1,23 @@
 import Foundation
 
+// Safe reserve capacity init (if library needs it)
 extension Array {
-  @inlinable
-  init(reserveCapacity: Int) {
-    self = [Element]()
-    self.reserveCapacity(reserveCapacity)
-  }
-
-  @inlinable
-  var slice: ArraySlice<Element> {
-    self[self.startIndex ..< self.endIndex]
-  }
+    @inlinable
+    init(reserveCapacity: Int) {
+        self = [Element](reserveCapacity: reserveCapacity)
+    }
 }
 
+// Fixed hex init for UInt8 array – no type mismatch, safe append
 extension Array where Element == UInt8 {
     public init(hex: String) {
         var buffer: UInt8? = nil
-        let hexicodeScalars = hex.unicodeScalars.lazy.underestimatedCount
+        let hexScalars = hex.unicodeScalars.lazy
 
-        self = Array(reserveCapacity: hexicodeScalars / 2 + 1)
+        self = Array(reserveCapacity: hexScalars.underestimatedCount / 2 + 1)
 
         var skip = hex.hasPrefix("0x") ? 2 : 0
-        for char in hex.unicodeScalars.lazy {
+        for char in hexScalars {
             guard skip == 0 else {
                 skip -= 1
                 continue
@@ -51,18 +47,7 @@ extension Array where Element == UInt8 {
         }
     }
 
-public extension Array where Element == UInt8 {
-  func toBase64() -> String {
-    Data(self).base64EncodedString()
-  }
-
-  init(base64: String) {
-    self.init()
-
-    guard let decodedData = Data(base64Encoded: base64) else {
-      return
+    public func toHexString() -> String {
+        map { String(format: "%02x", $0) }.joined()
     }
-
-    append(contentsOf: decodedData.bytes)
-  }
 }
